@@ -1,134 +1,154 @@
-// Gestion des commandes
-let orders = JSON.parse(localStorage.getItem('shadowboost_orders') || '[]');
-let currentId = parseInt(localStorage.getItem('shadowboost_id') || '1000');
+/**
+ * ShadowBoost - Logique Applicative (Front-end)
+ * Connecte l'interface utilisateur au serveur d'automatisation Python
+ */
 
-// Générer un ID unique
-function generateId() {
-  return 'SB-' + currentId + '-' + Math.floor(1000 + Math.random() * 9000);
-}
+// L'URL de votre API Flask Python (en local pour vos tests)
+const API_URL = "http://localhost:5000/api/boost";
 
-// Ajouter une commande
-document.getElementById('orderForm').addEventListener('submit', function(e) {
-  e.preventDefault();
-  const username = document.getElementById('username').value;
-  const platform = document.getElementById('platform').value;
-  const service = document.getElementById('service').value;
-  const quantity = parseInt(document.getElementById('quantity').value);
+document.addEventListener("DOMContentLoaded", () => {
+    const orderForm = document.getElementById("orderForm");
 
-  const orderId = generateId();
-  const estimatedTime = Math.max(1, Math.floor(quantity / 100)) * 30; // secondes
-  const startTime = new Date().getTime();
+    if (orderForm) {
+        orderForm.addEventListener("submit", function (e) {
+            e.preventDefault(); // Empêche la page de se recharger
 
-  const order = {
-    id: orderId,
-    username,
-    platform,
-    service,
-    quantity,
-    status: 'pending',
-    startTime,
-    estimatedTime,
-    delivered: 0
-  };
+            // 1. Récupération des données du formulaire
+            const username = document.getElementById("username").value.trim();
+            const platform = document.getElementById("platform").value;
+            const service = document.getElementById("service").value;
+            const quantity = parseInt(document.getElementById("quantity").value, 10);
 
-  orders.push(order);
-  currentId++;
-  localStorage.setItem('shadowboost_orders', JSON.stringify(orders));
-  localStorage.setItem('shadowboost_id', currentId.toString());
+            // Petit contrôle de sécurité basique en Front-end
+            if (!username) {
+                alert("Veuillez entrer un nom d'utilisateur valide.");
+                return;
+            }
 
-  alert(`Commande lancée ! ID: ${orderId}\nSuivez-la dans la section "Suivi de Commande".`);
-  simulateDelivery(order);
+            // 2. Envoi des données au serveur Python (Flask) via une requête POST
+            fetch(API_URL, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({
+                    username: username,
+                    platform: platform,
+                    service: service,
+                    quantity: quantity
+                })
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error("Le serveur Python ne répond pas correctement.");
+                }
+                return response.json();
+            })
+            .then(data => {
+                // 3. Si le serveur valide la commande
+                if (data.status === "success") {
+                    // On remplit automatiquement le champ de suivi avec l'ID généré par Python
+                    document.getElementById("trackId").value = data.order_id;
+                    
+                    // On lance l'affichage et l'animation du suivi de commande
+                    demarrerSuiviVisuel(quantity);
+                    
+                    // Scroll fluide vers la zone de suivi pour que l'utilisateur voie le résultat
+                    document.getElementById("status").scrollIntoView({ behavior: "smooth" });
+                } else {
+                    alert("Une erreur est survenue côté serveur : " + data.message);
+                }
+            })
+            .catch(error => {
+                console.error("Erreur de liaison:", error);
+                alert("Impossible de contacter le robot. Vérifiez que votre script Python (server.py) est bien lancé sur le port 5000.");
+            });
+        });
+    }
 });
 
-// Simuler la livraison
-function simulateDelivery(order) {
-  const interval = 1000;
-  let elapsed = 0;
-  const step = order.quantity / (order.estimatedTime * 2); // 2 livraisons par seconde
+/**
+ * Gère l'affichage, la barre de progression et le compte à rebours visuel
+ * @param {number} totalQuantity - La quantité totale de boost demandée
+ */
+function demarrerSuiviVisuel(totalQuantity) {
+    const orderStatusZone = document.getElementById("orderStatus");
+    const statusText = document.getElementById("statusText");
+    const progressBar = document.getElementById("progressBar");
+    const timeLeft = document.getElementById("timeLeft");
+    const resultCount = document.getElementById("resultCount");
 
-  const timer = setInterval(() => {
-    elapsed += 1;
-    order.delivered += step;
-    if (order.delivered >= order.quantity) {
-      order.delivered = order.quantity;
-      order.status = 'completed';
-    } else {
-      order.status = 'in_progress';
-    }
-    order = updateOrder(order);
-    if (order.status === 'completed') {
-      clearInterval(timer);
-      notifyUser(order);
-    }
-  }, interval);
+    // Afficher la zone de résultat (masquée par défaut)
+    orderStatusZone.style.display = "block";
+    
+    // Initialisation des compteurs
+    let progression = 0;
+    let minutesRestantes = Math.max(2, Math.floor(totalQuantity / 500)); // Calcule un temps proportionnel réaliste
+    
+    statusText.innerText = "Connexion aux serveurs de distribution...";
+    statusText.style.color = "#10b981"; // Vert Cyber
+    progressBar.style.width = "0%";
+    timeLeft.innerText = minutesRestantes + " min";
+    resultCount.innerText = "0 / " + totalQuantity;
+
+    // Simulation d'une progression dynamique pour l'utilisateur
+    const intervalSimule = setInterval(() => {
+        progression += 5;
+        
+        if (progression <= 15) {
+            statusText.innerText = "Initialisation du protocole sécurisé...";
+        } else if (progression > 15 && progression <= 50) {
+            statusText.innerText = "Envoi des paquets réseau (Boost en cours)...";
+        } else if (progression > 50 && progression <= 85) {
+            statusText.innerText = "Finalisation de la synchronisation algorithmique...";
+        } else if (progression > 85 && progression < 100) {
+            statusText.innerText = "Vérification de la stabilité du compte...";
+        }
+
+        // Mise à jour de la barre verte
+        progressBar.style.width = progression + "%";
+        
+        // Mise à jour du compteur de résultats délivrés
+        let quantitéActuelle = Math.floor((progression / 100) * totalQuantity);
+        resultCount.innerText = quantitéActuelle + " / " + totalQuantity;
+
+        // Diminution du temps restant au fil de la barre
+        if (progression % 25 === 0 && minutesRestantes > 1) {
+            minutesRestantes--;
+            timeLeft.innerText = minutesRestantes + " min";
+        }
+
+        // Fin de l'animation
+        if (progression >= 100) {
+            clearInterval(intervalSimule);
+            statusText.innerText = "Terminé avec succès !";
+            statusText.style.color = "#34d399";
+            timeLeft.innerText = "0 min";
+            resultCount.innerText = totalQuantity + " / " + totalQuantity;
+        }
+    }, 1500); // Vitesse de rafraîchissement visuel
 }
 
-// Mettre à jour la commande
-function updateOrder(updatedOrder) {
-  orders = orders.map(o => o.id === updatedOrder.id ? updatedOrder : o);
-  localStorage.setItem('shadowboost_orders', JSON.stringify(orders));
-  updateAdminPanel();
-  return updatedOrder;
-}
-
-// Suivre une commande
+/**
+ * Fonction appelée manuellement si l'utilisateur clique sur le bouton "Suivre la commande"
+ */
 function trackOrder() {
-  const trackId = document.getElementById('trackId').value.trim();
-  const order = orders.find(o => o.id === trackId);
-  if (!order) {
-    alert('Commande non trouvée.');
-    return;
-  }
-
-  document.getElementById('orderStatus').style.display = 'block';
-  document.getElementById('statusText').textContent = order.status === 'completed' ? 'Terminée' : 'En cours';
-  document.getElementById('resultCount').textContent = order.quantity.toLocaleString();
-  const progress = (order.delivered / order.quantity) * 100;
-  document.getElementById('progressBar').style.width = progress + '%';
-  const remaining = Math.max(0, order.estimatedTime - Math.floor((new Date().getTime() - order.startTime) / 1000));
-  document.getElementById('timeLeft').textContent = remaining > 0 ? `${Math.ceil(remaining / 60)} min` : 'Terminé';
+    const idSaisi = document.getElementById("trackId").value.trim();
+    
+    if (!idSaisi) {
+        alert("Veuillez entrer un ID de commande (Ex: SB-1234-5678).");
+        return;
+    }
+    
+    // Si l'utilisateur cherche un ID à la main, on simule une recherche rapide
+    const statusText = document.getElementById("statusText");
+    const orderStatusZone = document.getElementById("orderStatus");
+    
+    orderStatusZone.style.display = "block";
+    statusText.innerText = "Recherche de l'identifiant dans la base du bot...";
+    
+    setTimeout(() => {
+        // Lance une animation par défaut de 1000 abonnés pour la démonstration
+        demarrerSuiviVisuel(1000);
+    }, 1000);
 }
-
-// Notification utilisateur
-function notifyUser(order) {
-  if ('Notification' in window && Notification.permission === 'granted') {
-    new Notification('Boost Terminé', {
-      body: `Votre commande ${order.service} sur ${order.platform} est terminée ! ${order.quantity} unités livrées.`,
-      icon: 'https://cdn-icons-png.flaticon.com/512/1793/1793496.png'
-    });
-  }
-}
-
-// Initialisation
-function init() {
-  if ('Notification' in window && Notification.permission !== 'denied') {
-    Notification.requestPermission();
-  }
-  updateAdminPanel();
-}
-
-// Mise à jour du tableau admin
-function updateAdminPanel() {
-  const table = document.getElementById('statusTable').getElementsByTagName('tbody')[0];
-  table.innerHTML = '';
-  orders.forEach(order => {
-    const row = table.insertRow();
-    row.insertCell(0).textContent = order.id;
-    row.insertCell(1).textContent = order.username;
-    row.insertCell(2).textContent = `${order.platform} - ${order.service}`;
-    row.insertCell(3).textContent = order.quantity.toLocaleString();
-    row.insertCell(4).textContent = order.status === 'completed' ? '✅ Terminée' : '🔄 En cours';
-    const remaining = Math.max(0, order.estimatedTime - Math.floor((new Date().getTime() - order.startTime) / 1000));
-    row.insertCell(5).textContent = remaining > 0 ? `${Math.ceil(remaining / 60)} min` : '0 min';
-  });
-}
-
-// Détecter admin (saisir "admin" comme nom)
-document.addEventListener('input', function(e) {
-  if (e.target.id === 'username' && e.target.value.toLowerCase() === 'admin') {
-    document.getElementById('admin').style.display = 'block';
-    updateAdminPanel();
-  }
-});
-
-window.onload = init;
