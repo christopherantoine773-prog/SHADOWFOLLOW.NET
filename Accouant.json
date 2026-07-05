@@ -1,0 +1,30 @@
+{
+  "tiktok": [
+    {
+      "username": "free_apple_fr",
+      "cookies": [
+        {
+          "name": "session_id",
+          "value": "s%3Aabc123...",
+          "domain": ".tiktok.com",
+          "path": "/",
+          "secure": true,
+          "httpOnly": true
+        }
+      ]
+    },
+    {
+      "username": "cadeaux_gratuit",
+      "cookies": [
+        {
+          "name": "session_id",
+          "value": "s%3Adef456...",
+          "domain": ".tiktok.com",
+          "path": "/",
+          "secure": true,
+          "httpOnly": true
+        }
+      ]
+    }
+  ]
+}
