@@ -1,2 +1,0 @@
-# SHADOWFOLLOW.NET
-Following 
