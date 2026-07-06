@@ -1,10 +1,10 @@
 /**
  * ShadowBoost - Logique Applicative (Front-end)
- * Connecte l'interface utilisateur au serveur d'automatisation Python
+ * Connecte l'interface utilisateur au serveur d'automatisation Python sur Render
  */
 
-// L'URL de votre API Flask Python (en local pour vos tests)
-const API_URL = "http://localhost:5000/api/boost";
+// URL officielle de votre API Flask Python hébergée sur Render
+const API_URL = "https://shadowfollow-net.onrender.com/api/boost";
 
 document.addEventListener("DOMContentLoaded", () => {
     const orderForm = document.getElementById("orderForm");
@@ -13,7 +13,7 @@ document.addEventListener("DOMContentLoaded", () => {
         orderForm.addEventListener("submit", function (e) {
             e.preventDefault(); // Empêche la page de se recharger
 
-            // 1. Récupération des données du formulaire
+            // 1. Récupération des données du formulaire (Lien URL au lieu du pseudo)
             const username = document.getElementById("username").value.trim();
             const platform = document.getElementById("platform").value;
             const service = document.getElementById("service").value;
@@ -21,11 +21,11 @@ document.addEventListener("DOMContentLoaded", () => {
 
             // Petit contrôle de sécurité basique en Front-end
             if (!username) {
-                alert("Veuillez entrer un nom d'utilisateur valide.");
+                alert("Veuillez entrer un lien URL de vidéo valide.");
                 return;
             }
 
-            // 2. Envoi des données au serveur Python (Flask) via une requête POST
+            // 2. Envoi des données au serveur Render via une requête POST
             fetch(API_URL, {
                 method: "POST",
                 headers: {
@@ -40,7 +40,7 @@ document.addEventListener("DOMContentLoaded", () => {
             })
             .then(response => {
                 if (!response.ok) {
-                    throw new Error("Le serveur Python ne répond pas correctement.");
+                    throw new Error("Le serveur Render ne répond pas correctement.");
                 }
                 return response.json();
             })
@@ -61,7 +61,7 @@ document.addEventListener("DOMContentLoaded", () => {
             })
             .catch(error => {
                 console.error("Erreur de liaison:", error);
-                alert("Impossible de contacter le robot. Vérifiez que votre script Python (server.py) est bien lancé sur le port 5000.");
+                alert("Impossible de contacter le robot. Le serveur Render est peut-être en train de se réveiller (cela peut prendre 30 secondes). Veuillez réessayer.");
             });
         });
     }
@@ -98,11 +98,11 @@ function demarrerSuiviVisuel(totalQuantity) {
         if (progression <= 15) {
             statusText.innerText = "Initialisation du protocole sécurisé...";
         } else if (progression > 15 && progression <= 50) {
-            statusText.innerText = "Envoi des paquets réseau (Boost en cours)...";
+            statusText.innerText = "Routage via les proxies (Boost de vues en cours)...";
         } else if (progression > 50 && progression <= 85) {
             statusText.innerText = "Finalisation de la synchronisation algorithmique...";
         } else if (progression > 85 && progression < 100) {
-            statusText.innerText = "Vérification de la stabilité du compte...";
+            statusText.innerText = "Vérification de la bonne comptabilisation des vues...";
         }
 
         // Mise à jour de la barre verte
@@ -148,7 +148,7 @@ function trackOrder() {
     statusText.innerText = "Recherche de l'identifiant dans la base du bot...";
     
     setTimeout(() => {
-        // Lance une animation par défaut de 1000 abonnés pour la démonstration
+        // Lance une animation par défaut de 1000 vues pour la démonstration
         demarrerSuiviVisuel(1000);
     }, 1000);
 }
