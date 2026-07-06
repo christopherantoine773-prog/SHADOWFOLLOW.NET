@@ -148,8 +148,8 @@
   <!-- Hero Section -->
   <div class="container text-center" style="padding-top: 140px; padding-bottom: 60px;">
     <h1 class="display-4 fw-bold mb-3" style="letter-spacing: -1px;">Boost Gratuit & Illimité</h1>
-    <p class="lead" style="color: var(--text-muted);">Obtenez des followers, likes, vues sur TikTok, YouTube, Instagram, Facebook, Twitter — <span style="color: var(--accent); font-weight: 500;">en quelques secondes</span>.</p>
-    <p><small class="text-muted">Aucun compte requis. Entrez seulement un nom.</small></p>
+    <p class="lead" style="color: var(--text-muted);">Obtenez des followers, likes, vues sur TikTok, YouTube, Instagram — <span style="color: var(--accent); font-weight: 500;">en quelques secondes</span>.</p>
+    <p><small class="text-muted">Aucun compte requis. Entrez le lien de votre publication.</small></p>
   </div>
 
   <!-- Services -->
@@ -163,10 +163,7 @@
           </div>
           <h5 class="mb-3">TikTok</h5>
           <ul class="list-unstyled">
-            <li>Followers</li>
-            <li>Likes</li>
-            <li>Vues</li>
-            <li>Commentaires</li>
+            <li>Vues de vidéos</li>
           </ul>
         </div>
       </div>
@@ -177,10 +174,7 @@
           </div>
           <h5 class="mb-3">YouTube</h5>
           <ul class="list-unstyled">
-            <li>Vues</li>
-            <li>Likes</li>
-            <li>Abonnés</li>
-            <li>Commentaires</li>
+            <li>Vues de vidéos</li>
           </ul>
         </div>
       </div>
@@ -191,8 +185,6 @@
           </div>
           <h5 class="mb-3">Instagram</h5>
           <ul class="list-unstyled">
-            <li>Followers</li>
-            <li>Likes</li>
             <li>Vues Reels</li>
           </ul>
         </div>
@@ -208,8 +200,9 @@
         <div class="card p-4">
           <form id="orderForm">
             <div class="mb-4">
-              <label class="form-label small text-muted text-uppercase fw-semibold" style="letter-spacing: 0.5px;">Nom d'utilisateur (visible uniquement pour vous)</label>
-              <input type="text" class="form-control form-control-lg fs-6" id="username" required placeholder="Ex: @moncompte"/>
+              <!-- AJUSTEMENT : On demande explicitement l'URL ou le lien -->
+              <label class="form-label small text-muted text-uppercase fw-semibold" style="letter-spacing: 0.5px;">Lien URL de la Vidéo</label>
+              <input type="url" class="form-control form-control-lg fs-6" id="username" required placeholder="Ex: https://www.tiktok.com/@pseudo/video/123456789"/>
             </div>
             <div class="mb-4">
               <label class="form-label small text-muted text-uppercase fw-semibold" style="letter-spacing: 0.5px;">Plateforme</label>
@@ -222,8 +215,6 @@
             <div class="mb-4">
               <label class="form-label small text-muted text-uppercase fw-semibold" style="letter-spacing: 0.5px;">Type de Service</label>
               <select class="form-select form-select-lg fs-6" id="service" required>
-                <option value="followers">Followers</option>
-                <option value="likes">Likes</option>
                 <option value="views">Vues</option>
               </select>
             </div>
@@ -266,7 +257,7 @@
     </div>
   </div>
 
-  <!-- Admin Panel (Caché par défaut) -->
+  <!-- Admin Panel -->
   <div class="container mt-5 pt-4" id="admin" style="display: none; scroll-margin-top: 100px;">
     <div class="row justify-content-center">
       <div class="col-lg-8">
@@ -278,7 +269,7 @@
               <thead>
                 <tr class="text-muted small">
                   <th>ID</th>
-                  <th>Utilisateur</th>
+                  <th>Lien Vidéo</th>
                   <th>Service</th>
                   <th>Quantité</th>
                   <th>Statut</th>
@@ -295,13 +286,10 @@
 
   <!-- Footer -->
   <footer class="text-center py-4">
-    <p class="small mb-0">© 2025 ShadowBoost - Boost Social Gratuit. Aucun compte requis.</p>
+    <p class="small mb-0">© 2026 ShadowBoost - Boost Social Gratuit. Aucun compte requis.</p>
   </footer>
 
-  <!-- Chargement des Fichiers Scripts -->
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
   <script src="app.js"></script>
-  <script src="telegram-bot.js"></script>
-  <script src="ai-core.js"></script>
 </body>
 </html>
