@@ -4,6 +4,7 @@ from flask_cors import CORS
 import threading
 import random
 import time
+import os  # Ajouté pour détecter le port de Render
 
 app = Flask(__name__)
 CORS(app) # Permet au site HTML de communiquer avec le serveur
@@ -19,8 +20,7 @@ def receive_boost():
     service = data.get('service')
     quantity = data.get('quantity')
     
-    # Ici, au lieu d'un simple code Apple, on simule une génération
-    # de "code" de commande unique pour le bot TikTok
+    # Génération d'un "code" de commande unique pour le bot TikTok
     order_id = f"SB-{random.randint(1000, 9999)}-{random.randint(1000, 9999)}"
     
     # Écrire l'action requise dans votre fichier texte pour que le bot la lise
@@ -37,5 +37,8 @@ def receive_boost():
 # en tâche de fond...
 
 if __name__ == "__main__":
-    # Lancer le serveur Flask sur le port 5000
-    app.run(port=5000, debug=True)
+    # Récupère automatiquement le port attribué par Render (ou 5000 par défaut si test local)
+    port_render = int(os.environ.get("PORT", 5000))
+    
+    # Lancement du serveur sur toutes les interfaces réseau disponibles (0.0.0.0)
+    app.run(host="0.0.0.0", port=port_render, debug=True)
