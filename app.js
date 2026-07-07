@@ -50,8 +50,8 @@ document.addEventListener("DOMContentLoaded", () => {
                     // On remplit automatiquement le champ de suivi avec l'ID généré par Python
                     document.getElementById("trackId").value = data.order_id;
                     
-                    // On lance l'affichage et l'animation du suivi de commande
-                    demarrerSuiviVisuel(quantity);
+                    // On lance l'affichage et l'animation avec le compteur de départ fourni par Python
+                    demarrerSuiviVisuel(quantity, data.start_count);
                     
                     // Scroll fluide vers la zone de suivi pour que l'utilisateur voie le résultat
                     document.getElementById("status").scrollIntoView({ behavior: "smooth" });
@@ -68,15 +68,19 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 
 /**
- * Gère l'affichage, la barre de progression et le compte à rebours visuel
+ * Gère l'affichage, la barre de progression, le compteur de départ et le compte à rebours visuel
  * @param {number} totalQuantity - La quantité totale de boost demandée
+ * @param {number} startCount - Le nombre de vues qu'il y avait au départ
  */
-function demarrerSuiviVisuel(totalQuantity) {
+function demarrerSuiviVisuel(totalQuantity, startCount) {
     const orderStatusZone = document.getElementById("orderStatus");
     const statusText = document.getElementById("statusText");
     const progressBar = document.getElementById("progressBar");
     const timeLeft = document.getElementById("timeLeft");
     const resultCount = document.getElementById("resultCount");
+
+    // Sécurise la valeur si jamais elle n'est pas renvoyée
+    const vuesInitiales = startCount ? parseInt(startCount, 10) : 0;
 
     // Afficher la zone de résultat (masquée par défaut)
     orderStatusZone.style.display = "block";
@@ -89,7 +93,9 @@ function demarrerSuiviVisuel(totalQuantity) {
     statusText.style.color = "#10b981"; // Vert Cyber
     progressBar.style.width = "0%";
     timeLeft.innerText = minutesRestantes + " min";
-    resultCount.innerText = "0 / " + totalQuantity;
+    
+    // Affiche le compteur sous la forme : "Vues au départ: X | Ajoutées: 0 / Y"
+    resultCount.innerHTML = `Vues initiales : <b>${vuesInitiales}</b> | Progression : 0 / ${totalQuantity}`;
 
     // Simulation d'une progression dynamique pour l'utilisateur
     const intervalSimule = setInterval(() => {
@@ -109,8 +115,10 @@ function demarrerSuiviVisuel(totalQuantity) {
         progressBar.style.width = progression + "%";
         
         // Mise à jour du compteur de résultats délivrés
-        let quantitéActuelle = Math.floor((progression / 100) * totalQuantity);
-        resultCount.innerText = quantitéActuelle + " / " + totalQuantity;
+        let quantiteActuelle = Math.floor((progression / 100) * totalQuantity);
+        let totalVuesVirtuel = vuesInitiales + quantiteActuelle;
+        
+        resultCount.innerHTML = `Vues de départ : <b>${vuesInitiales}</b> (Total actuel : ${totalVuesVirtuel}) | Progression : ${quantiteActuelle} / ${totalQuantity}`;
 
         // Diminution du temps restant au fil de la barre
         if (progression % 25 === 0 && minutesRestantes > 1) {
@@ -124,7 +132,7 @@ function demarrerSuiviVisuel(totalQuantity) {
             statusText.innerText = "Terminé avec succès !";
             statusText.style.color = "#34d399";
             timeLeft.innerText = "0 min";
-            resultCount.innerText = totalQuantity + " / " + totalQuantity;
+            resultCount.innerHTML = `Vues initiales : <b>${vuesInitiales}</b> (Total final : ${vuesInitiales + totalQuantity}) | Progression : ${totalQuantity} / ${totalQuantity}`;
         }
     }, 1500); // Vitesse de rafraîchissement visuel
 }
@@ -148,7 +156,7 @@ function trackOrder() {
     statusText.innerText = "Recherche de l'identifiant dans la base du bot...";
     
     setTimeout(() => {
-        // Lance une animation par défaut de 1000 vues pour la démonstration
-        demarrerSuiviVisuel(1000);
+        // Lance une animation par défaut de 1000 vues pour la démonstration avec 450 vues de départ
+        demarrerSuiviVisuel(1000, 450);
     }, 1000);
 }
