@@ -45,17 +45,20 @@ def simuler_comportement_humain(driver):
 
 def visionner_video_avec_proxy(video_url, proxy_choisi):
     options = uc.ChromeOptions()
+    # Options indispensables pour faire tourner Google Chrome sur les serveurs de Render
+    options.add_argument('--headless=new')  # Ouvre le navigateur de manière invisible en arrière-plan
     options.add_argument('--no-sandbox')
     options.add_argument('--disable-dev-shm-usage')
+    options.add_argument('--disable-gpu')
     options.add_argument('--user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36')
     
     if proxy_choisi:
+        # Configuration au format exact réclamé par Chrome (--proxy-server=103.152.127.10:8080)
         print(f"[Proxy] Routage via : {proxy_choisi}")
         options.add_argument(f'--proxy-server={proxy_choisi}')
     
-    driver = uc.Chrome(options=options)
-    
     try:
+        driver = uc.Chrome(options=options)
         driver.set_page_load_timeout(25) 
         print(f"[Bot] Ouverture de la vidéo : {video_url}")
         driver.get(video_url)
@@ -71,11 +74,10 @@ def visionner_video_avec_proxy(video_url, proxy_choisi):
         time.sleep(temps_regard / 2)
         
         print("[Bot] Vue validée.")
+        driver.quit()
         
     except Exception as e:
-        print(f"[Erreur Navigateur] Session interrompue : {e}")
-    finally:
-        driver.quit()
+        print(f"[Erreur Navigateur] Session interrompue ou proxy trop lent : {e}")
 
 def monitor_and_view():
     published = load_published()
@@ -93,7 +95,9 @@ def monitor_and_view():
             
             for order in new_orders:
                 parts = order.split('_')
+                # S'adapte à la structure reçue (ORDER_orderID_username_platform_quantity)
                 if len(parts) >= 3:
+                    # Si c'est l'URL brute passée par app.js, on la récupère au bon index
                     video_url = parts[2]
                     
                     # Sélectionne une IP au hasard parmi vos 1000 proxies
